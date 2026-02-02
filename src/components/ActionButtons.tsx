@@ -68,7 +68,7 @@ function ActionButtons({}: Props) {
     };
 
     // Lógica para guardar los cambios
-    console.log("Saving changes...", reportUpdated);
+    // console.log("Saving changes...", reportUpdated);
     mutate({
       reportData: reportUpdated!,
     });
@@ -98,7 +98,7 @@ function ActionButtons({}: Props) {
                 }}
                 onClick={() => {
                   handleReset();
-                  //   window.location.href = `https://ckarlosdev.github.io/binder-webapp/#/binder/${jobId}`;
+                  window.location.href = `https://ckarlosdev.github.io/binder-webapp/#/binder/${jobId}`;
                 }}
                 variant="outline-primary"
                 className="no-print"
