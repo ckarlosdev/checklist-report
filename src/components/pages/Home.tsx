@@ -13,22 +13,24 @@ import useEmployees from "../../hooks/useEmployees";
 import type { apiClReport, Checklist, ClReport } from "../../types";
 import useChecklistStore from "../../stores/useChecklistStore";
 import { useMutationState } from "@tanstack/react-query";
+import useEquipmentClStore from "../../stores/useEquipmentClStore";
 
 type Props = {};
 
 function Home({}: Props) {
   const [searchParams] = useSearchParams();
   const componenteRef = useRef(null);
-  const { setIds, checklistId, isLoaded, setIsLoaded } = useContextStore();
+  const { setIds, checklistId, isLoaded, setIsLoaded, jobId } =
+    useContextStore();
   const { data: equipments } = useEquipments();
   const { data: employees } = useEmployees();
-  // const { report } = useChecklistStore();
 
   const { data: reportData } = useChecklist(
     checklistId ? Number(checklistId) : 0,
   );
 
-  const { fillReportByApi } = useChecklistStore();
+  const { fillReportByApi, resetReport } = useChecklistStore();
+  const { resetChecklist } = useEquipmentClStore();
 
   const isSaving = useMutationState({
     filters: { mutationKey: ["save-report"], status: "pending" },
@@ -54,27 +56,38 @@ function Home({}: Props) {
   });
 
   useEffect(() => {
-    const jobId = searchParams.get("jobId");
-    const checklistId = searchParams.get("checklistId");
-    console.log("Search Params:", { jobId, checklistId });
+    const jobIdParam = searchParams.get("jobId");
+    const checklistIdParam = searchParams.get("checklistId");
+    // console.log("Search Params:", { jobId, checklistId });
+    const isNewAction = searchParams.get("action") === "new";
 
-    if (jobId || checklistId) {
-      const storedJobId = Number(jobId);
-      const storedChecklistId = Number(checklistId);
+    const isDifferentJob = jobId && Number(jobIdParam) !== jobId;
+
+    if (isNewAction || (jobIdParam && isDifferentJob && !checklistIdParam)) {
+      handleReset();
+    }
+
+    if (jobIdParam || checklistIdParam) {
+      const storedJobId = Number(jobIdParam);
+      const storedChecklistId = Number(checklistIdParam);
       if (!isNaN(storedJobId) || !isNaN(storedChecklistId)) {
+        if (storedChecklistId !== checklistId) {
+          setIsLoaded(false); // <--- ESTO ES CLAVE
+        }
         setIds(storedJobId, storedChecklistId);
       }
     }
   }, [searchParams]);
 
-  // useEffect(() => {
-  //   console.log("Report actualizado en Home:", report.checklists);
-  // }, [report]);
+  const handleReset = () => {
+    resetReport();
+    resetChecklist();
+    setIsLoaded(false);
+  };
 
   useEffect(() => {
     if (reportData && !isLoaded) {
       const apiData = mapApiToClReport(reportData);
-      // console.log("report Data 2", apiData);
       fillReportByApi(apiData);
       setIsLoaded(true);
     }

@@ -158,7 +158,7 @@ export default function QrClModal({}: Props) {
                         <td>{equipment?.number}</td>
                         <td>{equipment?.name}</td>
                         <td>
-                          {employee?.firstName + " " + employee?.firstName}
+                          {employee?.firstName + " " + employee?.lastName}
                         </td>
                         <td>
                           {qrCl.status === "1" ? (

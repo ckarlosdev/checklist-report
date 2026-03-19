@@ -16,6 +16,7 @@ function List({}: Props) {
     (a, b) => (a.equipmentsId ?? 0) - (b.equipmentsId ?? 0),
   );
 
+
   return (
     <Table striped bordered hover style={{ marginTop: "20px" }}>
       <thead style={{ textAlign: "center" }}>

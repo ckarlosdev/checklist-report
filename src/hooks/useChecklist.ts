@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./apiConfig";
 import type { apiClReport } from "../types";
+import { useContextStore } from "../stores/useContextStore";
 
 const queryChecklist = async (checklistId: number): Promise<apiClReport> => {
   const { data } = await api.get(`v1/cl/${checklistId}`);
@@ -25,6 +26,8 @@ const createChecklist = async ({ reportData }: { reportData: any }) => {
 
 export function useSaveChecklist() {
   const queryClient = useQueryClient();
+  const jobId = useContextStore((s) => s.jobId);
+
   return useMutation({
     mutationKey: ["save-report"],
     mutationFn: createChecklist,
@@ -32,6 +35,7 @@ export function useSaveChecklist() {
       const newId = response.data.equipmentsGoogleChecklistsId;
       queryClient.invalidateQueries({ queryKey: ["save-report", newId] });
       alert("Data saved succesfully.");
+      window.location.href = `https://ckarlosdev.github.io/binder-webapp/#/binder/${jobId}`;
     },
     onError: () => {
       alert("Error saving data");

@@ -91,6 +91,12 @@ export type User = {
   id: number;
   fullName: string;
   email: string;
+  roles: Role[];
+};
+
+export type Role = {
+  id: number;
+  name: string;
 };
 
 export type apiClReport = {

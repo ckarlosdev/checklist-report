@@ -6,6 +6,7 @@ import { useContextStore } from "../stores/useContextStore";
 import useUser from "../hooks/useUser";
 import { useSaveChecklist } from "../hooks/useChecklist";
 import useEquipmentClStore from "../stores/useEquipmentClStore";
+import { useAuthStore } from "../hooks/authStore";
 
 type Props = {};
 
@@ -17,6 +18,7 @@ function ActionButtons({}: Props) {
   const { data: userData } = useUser();
   const { mutate, isPending: isSaving } = useSaveChecklist();
   const { resetChecklist } = useEquipmentClStore();
+  const { user: userAuth } = useAuthStore();
 
   const handleReset = () => {
     resetReport();
@@ -32,7 +34,7 @@ function ActionButtons({}: Props) {
       );
 
       const emp = employees?.find(
-        (emp) => emp.employeesId === check.employeesId,
+        (empl) => empl.employeesId === check.employeesId,
       );
 
       const options: Record<string, string> = {};
@@ -73,6 +75,11 @@ function ActionButtons({}: Props) {
       reportData: reportUpdated!,
     });
   };
+
+  const isAuthorized = userAuth?.roles?.some(
+    (role) =>
+      role.name === "ROLE_SUPERVISOR" || role.name === "ROLE_SUPERINTENDENT",
+  );
 
   return (
     <>
@@ -118,7 +125,7 @@ function ActionButtons({}: Props) {
                 onClick={() => {
                   handleSave();
                 }}
-                disabled={isSaving}
+                disabled={isSaving || !isAuthorized}
                 className="no-print"
               >
                 {isSaving ? (

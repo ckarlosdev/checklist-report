@@ -51,7 +51,6 @@ function LogoutButton({}: Props) {
         fontWeight: "bold",
         width: "120px",
         height: "40px",
-        marginTop: "18px",
       }}
       className="no-print"
     >
