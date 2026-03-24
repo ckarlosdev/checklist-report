@@ -15,6 +15,7 @@ import useChecklistStore from "../stores/useChecklistStore";
 import useEquipments from "../hooks/useEquipments";
 import useEmployees from "../hooks/useEmployees";
 import type { QrChecklist } from "../types";
+import useIssueStore from "../stores/useIssueStore";
 
 type Props = {};
 
@@ -30,6 +31,7 @@ export default function QrClModal({}: Props) {
   } = useQrChecklistStore();
   const { jobId } = useContextStore();
   const { report, addChecklist } = useChecklistStore();
+  const { setShowIssueModal, setChecklist } = useIssueStore();
   const { data: qrChecklistsData } = useQrChecklists(jobId!, report.date);
   const { data: equipments } = useEquipments();
   const { data: employees } = useEmployees();
@@ -52,6 +54,10 @@ export default function QrClModal({}: Props) {
     ) {
       alert("Equipment already added");
       return;
+    }
+
+    if (qrCl.comment) {
+      createIssue(qrCl);
     }
 
     addQrChecklist(qrCl);
@@ -84,6 +90,11 @@ export default function QrClModal({}: Props) {
     addChecklist(newChecklist);
   };
 
+  const createIssue = (qrCl: QrChecklist) => {
+    setChecklist(qrCl);
+    setShowIssueModal(true);
+  };
+
   const qrClRemoved = qrChecklistsData?.filter(
     (qrCl) => !qrClDeleted.includes(qrCl.checklistsId),
   );
@@ -92,7 +103,7 @@ export default function QrClModal({}: Props) {
     (qrCl) => !qrClAdded.includes(qrCl.checklistsId),
   );
 
-  //   console.log("test", report.checklists);
+    // console.log("test", qrChecklistsData);
 
   return (
     <>

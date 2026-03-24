@@ -50,7 +50,13 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    console.log(
+      "Interceptor error:",
+      error.response?.status,
+      error.config?.url,
+    );
     if (error.response?.status === 401 && !originalRequest._retry) {
+      console.log("Entró al bloque de 401");
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -74,6 +80,7 @@ api.interceptors.response.use(
       }
 
       try {
+        console.log("Intentando refresh...");
         const res = await axios.post(
           "https://api-gateway-px44.onrender.com/api/auth/refresh",
           { refreshToken },
@@ -81,8 +88,10 @@ api.interceptors.response.use(
 
         const { token: newToken, refreshToken: newRefresh } = res.data;
 
-        login(newToken, newRefresh);
+        login(newToken, newRefresh); // Actualiza Zustand y LocalStorage
+        console.log("Refresh exitoso");
 
+        // IMPORTANTE: Actualizar el header de la petición original
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
 
         processQueue(null, newToken);

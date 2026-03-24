@@ -2,6 +2,7 @@ import { Button, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import QrClModal from "./QrClModal";
 import useQrChecklistStore from "../stores/useQrChecklistStore";
+import IssueModal from "./IssueModal";
 
 type Props = {};
 
@@ -36,6 +37,7 @@ function ClButtons({}: Props) {
         </Button>
       </Col>
       <QrClModal />
+      <IssueModal />
     </>
   );
 }

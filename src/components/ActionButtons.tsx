@@ -7,6 +7,7 @@ import useUser from "../hooks/useUser";
 import { useSaveChecklist } from "../hooks/useChecklist";
 import useEquipmentClStore from "../stores/useEquipmentClStore";
 import { useAuthStore } from "../hooks/authStore";
+import useQrChecklistStore from "../stores/useQrChecklistStore";
 
 type Props = {};
 
@@ -19,15 +20,16 @@ function ActionButtons({}: Props) {
   const { mutate, isPending: isSaving } = useSaveChecklist();
   const { resetChecklist } = useEquipmentClStore();
   const { user: userAuth } = useAuthStore();
+  const { reset: resetQrDataStore } = useQrChecklistStore();
 
   const handleReset = () => {
     resetReport();
     resetChecklist();
+    resetQrDataStore();
     setIsLoaded(false);
   };
 
   const handleSave = () => {
-    // console.log("userData", userData);
     const flattenedChecklists = report.checklists.map((check) => {
       const equip = equipment?.find(
         (e) => e.equipmentsId === check.equipmentsId,
@@ -69,8 +71,6 @@ function ActionButtons({}: Props) {
       checklists: flattenedChecklists,
     };
 
-    // Lógica para guardar los cambios
-    // console.log("Saving changes...", reportUpdated);
     mutate({
       reportData: reportUpdated!,
     });
@@ -111,7 +111,7 @@ function ActionButtons({}: Props) {
                 className="no-print"
               >
                 <i className="bi bi-backspace" style={{ margin: "6px" }}></i>
-                Back
+                Home
               </Button>
               <Button
                 style={{

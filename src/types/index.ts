@@ -125,3 +125,17 @@ export type apiChecklist = {
   comment: string;
   otherType: string;
 };
+
+export type Issue = {
+  checklistsId: number | null;
+  equipmentsId: number | null;
+  flow: string;
+  reportedBy: string;
+  reportedDate: string;
+  priorityIssue: string;
+  typeIssue: string;
+  descriptionIssue: string;
+  details: string;
+  createdBy: string;
+  updatedBy: string;
+};
