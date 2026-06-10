@@ -3,19 +3,26 @@ import useChecklistStore from "../stores/useChecklistStore";
 import useEmployees from "../hooks/useEmployees";
 import useEquipments from "../hooks/useEquipments";
 import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
 
 type Props = {};
 
 function List({}: Props) {
   const { report, removeChecklist } = useChecklistStore();
-  const { data: employees } = useEmployees();
-  const { data: equipments } = useEquipments();
+  const { data: employees, isLoading: loadingEmployees } = useEmployees();
+  const { data: equipments, isLoading: loadingEquipments } = useEquipments();
   const navigate = useNavigate();
 
-  const clSorted = report.checklists.sort(
-    (a, b) => (a.equipmentsId ?? 0) - (b.equipmentsId ?? 0),
-  );
+  const clSorted = useMemo(() => {
+    if (!report?.checklists) return [];
+    return [...report.checklists].sort(
+      (a, b) => (a.equipmentsId ?? 0) - (b.equipmentsId ?? 0),
+    );
+  }, [report.checklists]);
 
+  if (loadingEmployees || loadingEquipments) {
+    return <div className="text-center my-4">Loading data...</div>;
+  }
 
   return (
     <Table striped bordered hover style={{ marginTop: "20px" }}>
@@ -33,18 +40,22 @@ function List({}: Props) {
             (eq) => eq.equipmentsId === cl.equipmentsId,
           );
 
-          let equipName = "Other";
-          if (equipment !== undefined) {
-            equipName = equipment?.number + " " + equipment?.name;
-          }
+          const equipName = equipment
+            ? `${equipment.number} ${equipment.name}`
+            : "Other";
 
           const employee = employees?.find(
             (emp) => emp.employeesId === cl.employeesId,
           );
+
+          const employeeName = employee
+            ? `${employee.firstName} ${employee.lastName}`
+            : "Unknown Operator";
+
           return (
             <tr key={cl.temporalId}>
               <td>{equipName}</td>
-              <td>{employee?.firstName + " " + employee?.lastName}</td>
+              <td>{employeeName}</td>
               <td>
                 <Button
                   variant="outline-warning"

@@ -111,7 +111,7 @@ function ActionButtons({}: Props) {
                 className="no-print"
               >
                 <i className="bi bi-backspace" style={{ margin: "6px" }}></i>
-                Home
+                Binder
               </Button>
               <Button
                 style={{

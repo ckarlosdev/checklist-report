@@ -86,12 +86,15 @@ function Home({}: Props) {
   };
 
   useEffect(() => {
-    if (reportData && !isLoaded) {
+    const equipmentsReady = equipments && equipments.length > 0;
+    const employeesReady = employees && employees.length > 0;
+
+    if (reportData && !isLoaded && equipmentsReady && employeesReady) {
       const apiData = mapApiToClReport(reportData);
       fillReportByApi(apiData);
       setIsLoaded(true);
     }
-  }, [reportData]);
+  }, [reportData, equipments, employees, isLoaded]);
 
   const mapApiToClReport = (apiData: apiClReport): ClReport => {
     return {
@@ -104,8 +107,12 @@ function Home({}: Props) {
           (e) => e.number === apiCl.equipmentNumber,
         );
         const foundEmp = employees?.find(
-          (emp) => emp.firstName + " " + emp.lastName === apiCl.operator,
+          (emp) =>
+            `${emp.firstName} ${emp.lastName}`.trim().toLowerCase() ===
+            apiCl.operator?.trim().toLowerCase(),
         );
+
+        console.log("map api data");
 
         return {
           temporalId: crypto.randomUUID(),
