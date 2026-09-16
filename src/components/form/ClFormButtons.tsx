@@ -22,7 +22,7 @@ function ClFormButtons({}: Props) {
       alert("Please select an operator.");
       return false;
     }
-    if (checklist.equipmentsId === 0 && checklist.comment.trim() === "") {
+    if (checklist.equipmentsId === 0 && checklist.equipmentName.trim() === "") {
       alert("Please provide a equipment name for 'Other' equipment type.");
       return false;
     }
