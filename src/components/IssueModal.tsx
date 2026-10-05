@@ -6,6 +6,7 @@ import useEquipments from "../hooks/useEquipments";
 import useEmployees from "../hooks/useEmployees";
 import useUser from "../hooks/useUser";
 import { useSaveIssue } from "../hooks/useIssue";
+import type { EquipmentDataDto, EquipmentIssueCreateDto, EquipmentIssueRequestDto } from "../types";
 
 type Props = {};
 
@@ -21,7 +22,7 @@ function IssueModal({}: Props) {
   const { data: equipments } = useEquipments();
   const { data: employees } = useEmployees();
   const { data: userData } = useUser();
-  const { mutate } = useSaveIssue();
+  const { saveIssueProcess, isPending } = useSaveIssue();
 
   useEffect(() => {
     if (qrChecklist?.equipmentsId) {
@@ -49,31 +50,61 @@ function IssueModal({}: Props) {
     return equipment ? equipment.name : "Not found";
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // validate
     if (!validate()) return;
     // build payload
-    const payload = {
+    const issuePayload = {
       ...issue,
       createdBy: userData.email,
       updatedBy: userData.email,
       flow: "Pending",
     };
-    // mutate
-    mutate(
-      { issueData: payload },
-      {
-        onSuccess: () => {
-          alert("Issue created successfully.");
-          reset();
-          setShowIssueModal(false);
-        },
-        onError: (error) => {
-          console.log(error);
-          alert("Error creating the issue.");
-        },
-      },
+
+    const issueDataPayload: EquipmentIssueRequestDto = {
+      // Agrega los campos que requiere EquipmentIssueRequestDto
+      equipmentId: issue.equipmentsId || 0,
+      reportedBy: issue.reportedBy,
+      issueDescription: issue.descriptionIssue,
+      severity: issue.priorityIssue,
+      userName: userData.email,
+      issueType: issue.typeIssue,
+      details: issue.details,
+    };
+
+    const equipmentSelected = equipments?.find(
+      (equip) => equip.equipmentsId === issue.equipmentsId,
     );
+
+    if (!equipmentSelected) {
+      throw new Error(`equipment no found`);
+    }
+
+    const equipmentPayload: EquipmentDataDto = {
+      number: equipmentSelected.number,
+      type: "Equipment",
+      name: equipmentSelected.name,
+    };
+
+    const maintenancePayload: EquipmentIssueCreateDto = {
+        issueData: issueDataPayload,
+        equipmentData: equipmentPayload,
+      };
+
+    // mutate
+    try {
+      // Ejecutar el proceso completo (Issue + Mantenimiento + Rollback si falla)
+      await saveIssueProcess(issuePayload, maintenancePayload);
+
+      // Si todo salió bien:
+      alert("Issue created successfully.");
+      reset();
+      setShowIssueModal(false);
+    } catch (error) {
+      // Si algo falló en cualquiera de las dos llamadas o en el rollback:
+      console.error("Error al procesar el issue:", error);
+      alert("Error creating the issue.");
+    }
   };
 
   const validate = () => {
@@ -104,7 +135,7 @@ function IssueModal({}: Props) {
         size="lg"
         // contentClassName="custom-modal-style"
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton={!isPending}>
           <Modal.Title
             className="w-100 text-center"
             style={{ fontWeight: "bold" }}
@@ -124,6 +155,7 @@ function IssueModal({}: Props) {
                       : ""
                   }
                   readOnly
+                  disabled={isPending}
                 />
               </FloatingLabel>
             </Col>
@@ -132,6 +164,7 @@ function IssueModal({}: Props) {
                 <Form.Control
                   style={{ fontWeight: "bold", textAlign: "center" }}
                   readOnly
+                  disabled={isPending}
                   value={issue?.reportedBy}
                 />
               </FloatingLabel>
@@ -144,6 +177,7 @@ function IssueModal({}: Props) {
                   aria-label="Floating label select example"
                   style={{ fontWeight: "bold", textAlign: "center" }}
                   value={issue.typeIssue}
+                  disabled={isPending}
                   onChange={(e) => {
                     const val = e.target.value === "" ? "" : e.target.value;
                     setIssueData("typeIssue", val);
@@ -175,6 +209,7 @@ function IssueModal({}: Props) {
                   aria-label="Floating label select example"
                   style={{ fontWeight: "bold", textAlign: "center" }}
                   value={issue.priorityIssue}
+                  disabled={isPending}
                   onChange={(e) => {
                     const val = e.target.value === "" ? "" : e.target.value;
                     setIssueData("priorityIssue", val);
@@ -203,6 +238,7 @@ function IssueModal({}: Props) {
                     background: "#e9e9e9",
                   }}
                   readOnly
+                  disabled={isPending}
                   value={issue.descriptionIssue}
                 />
               </FloatingLabel>
@@ -220,6 +256,7 @@ function IssueModal({}: Props) {
                     textAlign: "center",
                   }}
                   value={issue.details}
+                  disabled={isPending}
                   onChange={(e) => setIssueData("details", e.target.value)}
                 />
               </FloatingLabel>
@@ -231,8 +268,10 @@ function IssueModal({}: Props) {
             variant="outline-primary"
             style={{ fontWeight: "bold" }}
             onClick={() => handleSave()}
+            disabled={isPending}
           >
             Save Issue
+            {isPending ? "Saving..." : "Save Issue"}
           </Button>
         </Modal.Footer>
       </Modal>
