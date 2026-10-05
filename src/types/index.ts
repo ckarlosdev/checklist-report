@@ -139,3 +139,25 @@ export type Issue = {
   createdBy: string;
   updatedBy: string;
 };
+
+export type EquipmentIssueRequestDto = {
+  equipmentId: number;
+  reportedBy: string;
+  issueDescription: string;
+  severity: string;
+  userName: string;
+  referenceID?: number;
+  issueType: string;
+  details: string;
+};
+
+export type EquipmentIssueCreateDto = {
+  issueData: EquipmentIssueRequestDto;
+  equipmentData: EquipmentDataDto;
+};
+
+export type EquipmentDataDto = {
+  number: string;
+  type: string;
+  name: string;
+};
