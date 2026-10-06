@@ -22,13 +22,23 @@ function ClData({}: Props) {
     return a.firstName > b.firstName ? 1 : -1;
   });
 
-  const equipmentFiltered = equipments?.filter((equip) => {
-    const isAssigned = report.checklists?.some(
-      (check) => check.equipmentsId === equip.equipmentsId,
+  const equipmentFiltered = equipments
+    ?.filter((equip) => {
+      const isAssigned = report.checklists?.some(
+        (check) => check.equipmentsId === equip.equipmentsId,
+      );
+      const isCurrentSelection = equip.equipmentsId === checklist.equipmentsId;
+
+      return (
+        equip.family === "Equipment" && (!isAssigned || isCurrentSelection)
+      );
+    })
+    .sort((a, b) =>
+      a.number.localeCompare(b.number, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      }),
     );
-    const isCurrentSelection = equip.equipmentsId === checklist.equipmentsId;
-    return !isAssigned || isCurrentSelection;
-  });
 
   const handleEquipment = (value: number) => {
     if (isNaN(value)) {
